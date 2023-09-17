@@ -1,30 +1,76 @@
+from xml.etree import ElementTree
+from io import BytesIO
+
 from player import Player
+
+
+def dict_to_player(dict):
+    return Player(dict['nickname'], dict['email'], dict['date_of_birth'], int(dict['xp']), dict['cls'])
 
 
 class PlayerFactory:
     def to_json(self, players):
-        '''
-            This function should transform a list of Player objects into a list with dictionaries.
-        '''
-        pass
+        try:
+            formatted_players = []
+
+            for player in players:
+                player_dict = player.__dict__
+                player_dict['date_of_birth'] = player_dict['date_of_birth'].strftime("%Y-%m-%d")
+                formatted_players.append(player_dict)
+            return formatted_players
+        except:
+            return 'err'
 
     def from_json(self, list_of_dict):
-        '''
-            This function should transform a list of dictionaries into a list with Player objects.
-        '''
-        pass
+        try:
+            formatted_players = []
+
+            for obj in list_of_dict:
+                formatted_players.append(dict_to_player(obj))
+
+            return formatted_players
+        except:
+            return 'err'
 
     def from_xml(self, xml_string):
-        '''
-            This function should transform a XML string into a list with Player objects.
-        '''
-        pass
+        try:
+            players_data = []
+
+            tree = ElementTree.fromstring(xml_string)
+            root = tree.findall('player')
+
+            for player in root:
+                player_data = {}
+                for child in player:
+                    player_data[child.tag] = child.text
+                players_data.append(dict_to_player(player_data))
+
+            return players_data
+        except:
+            return 'err'
 
     def to_xml(self, list_of_players):
         '''
             This function should transform a list with Player objects into a XML string.
         '''
-        pass
+        root = ElementTree.Element('data')
+        for obj in list_of_players:
+            player = ElementTree.SubElement(root, 'player')
+            obj_dict = obj.__dict__
+
+            for key, value in obj_dict.items():
+                child = ElementTree.SubElement(player, key)
+                if key is 'date_of_birth':
+                    child.text = str(value.strftime("%Y-%m-%d"))
+                else:
+                    child.text = str(value)
+        tree = ElementTree.ElementTree(root)
+
+        xml_string_io = BytesIO()
+        tree.write(xml_string_io, encoding='utf-8', xml_declaration=True)
+        xml_string = xml_string_io.getvalue().decode('utf-8')
+
+        return xml_string
 
     def from_protobuf(self, binary):
         '''
@@ -37,4 +83,3 @@ class PlayerFactory:
             This function should transform a list with Player objects intoa binary protobuf string.
         '''
         pass
-

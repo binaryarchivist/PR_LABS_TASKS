@@ -4,13 +4,13 @@
     "email": "alpha@gmail.com",
     "date_of_birth": "2000-04-04",
     "xp": 455,
-    "class": "Berserk"
+    "cls": "Berserk"
   },
   {
     "nickname": "Beta",
     "email": "beta@gmail.com",
     "date_of_birth": "2001-06-10",
     "xp": 657,
-    "class": "Tank"
+    "cls": "Tank"
   }
 ]
