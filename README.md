@@ -1,1 +1,1 @@
-# PR_LABS_TASKS
+# Network Programming Laboratory work
