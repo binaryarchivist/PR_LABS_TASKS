@@ -5,14 +5,15 @@ import sys
 import re
 
 HOST = '127.0.0.1'
-PORT = 3003
+PORT = 3000
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 server_socket.bind((HOST, PORT))
 
 # Listen for incoming connections
-server_socket.listen(5)  # Backlog for multiple simultaneous connections
+server_socket.listen()  # Backlog for multiple simultaneous connections
 print(f"Server is listening on {HOST}:{PORT}")
 
 
@@ -41,7 +42,6 @@ def handle_request(client_socket):
     file = open('./mocks/products.json')
     products: list = json.load(file)
 
-    # Define a simple routing mechanism
     if path == '/home':
         response_content = 'Hello, World!'
     elif path == '/about':
@@ -59,7 +59,7 @@ def handle_request(client_socket):
                 t += char
 
         if int(t) < len(products):
-            response_content = f'<div style="display: flex; flex-direction: column; gap: 2px"><span>Name: f{products[int(t)]["name"]}</span><span>Author: f{products[int(t)]["author"]}</span><span>Price: f{products[int(t)]["price"]}</span>  <span>Description: f{products[int(t)]["description"]}</span> </div>'
+            response_content = f'<div style="display: flex; flex-direction: column; gap: 2px"><span>Name: {products[int(t)]["name"]}</span><span>Author: {products[int(t)]["author"]}</span><span>Price: {products[int(t)]["price"]}</span>  <span>Description: {products[int(t)]["description"]}</span> </div>'
         else:
             response_content = f'404 Not Found {t}'
             status_code = 404
