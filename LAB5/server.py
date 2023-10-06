@@ -3,7 +3,7 @@ import threading
 import json
 
 
-class Chat:
+class Server:
     def __init__(self, host, port):
         self.clients = []
         self.host = host
@@ -69,5 +69,5 @@ class Chat:
 
 
 if __name__ == "__main__":
-    server = Chat('127.0.0.1', 12345)
+    server = Server('127.0.0.1', 12345)
     server.start()
