@@ -1,6 +1,12 @@
+import base64
+import os
 import socket
 import threading
 import json
+
+from time import sleep
+
+CHUNK_SIZE = 4096
 
 
 class Server:
@@ -32,10 +38,11 @@ class Server:
 
         while True:
             try:
-                message_json = client_socket.recv(1024).decode('utf-8')
+                message_json = client_socket.recv(8192).decode('utf-8')
                 if not message_json:
                     break
                 message_data = json.loads(message_json)
+
                 if message_data["type"] == "connect":
                     client_name = message_data["payload"]["name"]
                     client_room = message_data["payload"]["room"]
@@ -52,6 +59,55 @@ class Server:
                         "text": message_data["payload"]["text"]
                     })
                     self.broadcast(broadcast_message)
+
+                elif message_data["type"] == "upload":
+                    binary = message_data["payload"]["binary"]
+                    file_name = message_data["payload"]["file_name"]
+                    is_completed = message_data["payload"]["is_completed"]
+                    with open(f'./media-server/{file_name}', 'ab') as file:
+                        decoded_chunk = base64.b64decode(binary)
+                        file.write(decoded_chunk)
+                        file.flush()
+                        file.close()
+
+                    if is_completed:
+                        broadcast_message = self.format_message("message", {
+                            "sender": client_name,
+                            "room": client_room,
+                            "text": f'User {client_name} uploaded the {file_name} file'
+                        })
+                        self.broadcast(broadcast_message)
+
+                elif message_data["type"] == "download":
+                    file_name = message_data["payload"]["file_name"]
+                    if not os.path.isfile(f'./media-server/{file_name}'):
+                        broadcast_message = self.format_message("message", {
+                            "sender": client_name,
+                            "room": client_room,
+                            "text": f'The {file_name} doesn\'t exist'
+                        })
+                        client_socket.send(broadcast_message.encode('utf-8'))
+
+                    with open(f'./media-server/{file_name}', "rb") as file:
+                        chunk = file.read(CHUNK_SIZE)
+                        while chunk:
+                            base64_chunk = base64.b64encode(chunk).decode('utf-8')
+                            broadcast_message = self.format_message("download", {
+                                "sender": client_name,
+                                "room": client_room,
+                                "binary": base64_chunk,
+                                "file_name": file_name
+                            })
+                            client_socket.send(broadcast_message.encode('utf-8'))
+                            sleep(1)
+                            chunk = file.read(CHUNK_SIZE)
+
+                        broadcast_message = self.format_message("message", {
+                            "sender": client_name,
+                            "room": client_room,
+                            "text": 'Download has completed',
+                        })
+                        client_socket.send(broadcast_message.encode('utf-8'))
 
             except json.JSONDecodeError:
                 print(f"Received invalid JSON data from {client_address}. Disconnecting client...")
