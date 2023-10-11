@@ -114,6 +114,10 @@ class Client:
                 message_text = message_text.replace('download: ', '')
                 file_name = os.path.basename(message_text)
 
+                if os.path.exists(f'./media-client/{file_name}'):
+                    print('File already exists.')
+                    continue
+
                 message = self.format_message(self.MSG_DOWNLOAD, {
                     "sender": self.client_name,
                     "room": self.room_name,
