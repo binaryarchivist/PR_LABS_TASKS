@@ -71,10 +71,10 @@ class Server:
                         file.close()
 
                     if is_completed:
-                        broadcast_message = self.format_message("message", {
+                        broadcast_message = self.format_message("notification", {
                             "sender": client_name,
                             "room": client_room,
-                            "text": f'User {client_name} uploaded the {file_name} file'
+                            "message": f'User {client_name} uploaded the {file_name} file'
                         })
                         self.broadcast(broadcast_message)
 
