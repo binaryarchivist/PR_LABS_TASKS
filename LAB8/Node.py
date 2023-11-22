@@ -1,6 +1,7 @@
 import json
 import socket
 from pprint import pprint
+from server.main import startup_server
 
 
 class Node:
@@ -17,6 +18,7 @@ class Node:
         self.leader_host = None
 
         self.followers = []
+        self.flask_app = {}
         self.initialize_socket()
 
     def initialize_socket(self) -> None:
@@ -30,6 +32,7 @@ class Node:
                 self.port += 1
 
     def listen(self) -> None:
+        self.flask_app = startup_server(self.host, self.port)
         while True:
             data, addr = self.udp_socket.recvfrom(self.buffer_size)
             # print('data: ', data, '\n addr: ', addr)

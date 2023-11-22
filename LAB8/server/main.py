@@ -1,7 +1,7 @@
 from flask import Flask
 
-from models.database import db
-
+from .database.database import db
+from .routes.routes import register_routes
 from flask_swagger_ui import get_swaggerui_blueprint
 
 from dotenv import load_dotenv
@@ -11,9 +11,9 @@ SWAGGER_URL = "/docs"
 API_URL = "/static/docs.json"
 
 
-def create_node(address: str, port: int) -> Flask:
+def initialize_flask(host: str, port: int) -> Flask:
     load_dotenv()
-    app = Flask(__name__)
+    app = Flask(f'{host}:{port}')
 
     swagger_ui_blueprint = get_swaggerui_blueprint(
         SWAGGER_URL,
@@ -32,6 +32,12 @@ def create_node(address: str, port: int) -> Flask:
         'SQLALCHEMY_DATABASE_URI'] = f'postgresql://{postgres_user}:{postgres_password}@127.0.0.1:5432/{postgres_db}'
 
     db.init_app(app)
-    app.run(host=address, port=port)
     return app
+
+
+def startup_server(host: str, port: int) -> Flask:
+    flask_app = initialize_flask(host, port)
+    register_routes(flask_app)
+    flask_app.run(host, port)
+    return flask_app
 
