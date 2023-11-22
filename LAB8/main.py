@@ -1,7 +1,8 @@
 import threading
 
 from Node import Node
-from Orchestrator import Orchestrator
+from Cluster import Cluster
+from Gateway import Gateway
 
 
 def main() -> None:
@@ -9,22 +10,20 @@ def main() -> None:
 
     for _ in range(10):
         node: Node = Node()
-        print(node.host, node.port)
         nodes.append(node)
 
     for node in nodes:
         listener_thread = threading.Thread(target=node.listen)
         listener_thread.start()
 
-    orchestrator: Orchestrator = Orchestrator(nodes)
+    cluster: Cluster = Cluster(nodes)
+    cluster.run_election()
+    cluster.start_heartbeat()
 
-    orchestrator.run_election()
+    gateway = Gateway(cluster.nodes, cluster.leader_node)
+    gateway_thread = threading.Thread(target=gateway.run)
+    gateway_thread.start()
 
-    orchestrator.start_heartbeat()
-
-
-# TODO: Raise HTTP servers on each Node, make Leader act as a Gateway for all requests, implement re-election
 
 if __name__ == "__main__":
     main()
-

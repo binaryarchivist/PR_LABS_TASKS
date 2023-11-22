@@ -1,6 +1,5 @@
 import json
 import socket
-from pprint import pprint
 from server.main import startup_server
 
 
@@ -33,11 +32,12 @@ class Node:
 
     def listen(self) -> None:
         self.flask_app = startup_server(self.host, self.port)
+
         while True:
             data, addr = self.udp_socket.recvfrom(self.buffer_size)
-            # print('data: ', data, '\n addr: ', addr)
+
             message = json.loads(data.decode('utf-8'))
-            # print(f'Message received: {self.host}:{self.port}', message)
+            print(f'Message received: {self.host}:{self.port}', message)
 
             if message['type'] == 'leader_credentials':
                 self.leader_host = message['leader_host']
@@ -54,9 +54,17 @@ class Node:
                     'host': message['follower_host'],
                     'port': message['follower_port']
                 })
+            elif message['type'] == 'replicate':
+                print(f"Replicating data: {message['data']}")
 
     def send_message(self, host, port, msg) -> None:
         bytes_msg = json.dumps(msg).encode('utf-8')
 
         self.udp_socket.sendto(bytes_msg, (host, port))
-        # response = self.udp_socket.recvfrom(self.buffer_size)[0]
+
+    def replicate_to_followers(self, data):
+        for follower in self.followers:
+            self.send_message(follower['host'], follower['port'], {
+                'type': 'replicate',
+                'data': data
+            })

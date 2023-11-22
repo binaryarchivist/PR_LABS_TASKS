@@ -1,11 +1,9 @@
 import random
 
 from Node import Node
-import threading
-import time
 
 
-class Orchestrator:
+class Cluster:
     def __init__(self, nodes: list[Node]):
         self.leader_node: Node | None = None
         self.nodes: list[Node] = nodes
@@ -44,6 +42,7 @@ class Orchestrator:
         for node in self.nodes:
             if node == self.leader_node:
                 continue
+            print('node.port: ', node.port)
             self.leader_node.send_message(node.host, node.port, {
                 'type': 'leader_credentials',
                 'leader_host': self.leader_node.host,
