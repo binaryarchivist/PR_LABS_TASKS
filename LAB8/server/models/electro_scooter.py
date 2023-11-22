@@ -1,5 +1,4 @@
-# models/electro_scooter.py
-from models.database import db
+from ..database.database import db
 
 
 class ElectroScooter(db.Model):
