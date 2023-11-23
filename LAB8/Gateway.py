@@ -38,6 +38,7 @@ class Gateway:
                 try:
                     access_token = self.get_token()
                     body = request.get_json()
+                    # print(f'Follower nodes to be notified: {len(self.leader_node.followers)}')
                     response = requests.request(method=method,
                                                 url=f'http://{self.leader_node.host}:{self.leader_node.port}/{path}',
                                                 headers={
