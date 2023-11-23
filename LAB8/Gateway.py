@@ -1,6 +1,5 @@
-from functools import wraps
-
 from flask import Flask, request, jsonify
+from functools import wraps
 
 import requests
 import random
@@ -38,7 +37,6 @@ class Gateway:
                 try:
                     access_token = self.get_token()
                     body = request.get_json()
-                    # print(f'Follower nodes to be notified: {len(self.leader_node.followers)}')
                     response = requests.request(method=method,
                                                 url=f'http://{self.leader_node.host}:{self.leader_node.port}/{path}',
                                                 headers={
@@ -48,7 +46,6 @@ class Gateway:
                                                 },
                                                 json=body)
 
-                    # Notify followers of write operation
                     self.leader_node.replicate_to_followers(body)
 
                     return jsonify(response.json()), response.status_code
@@ -76,7 +73,7 @@ class Gateway:
 
         @self.app.route('/api/electro-scooters/<int:scooter_id>', methods=["GET"])
         @self.handle_read('/api/electro-scooters/<int:scooter_id>')
-        def handle_read():
+        def get_scooter():
             pass
 
         @self.app.route('/api/electro-scooters', methods=['POST'])
