@@ -1,6 +1,5 @@
 import json
 import socket
-from server.main import startup_server
 
 
 class Node:
@@ -31,8 +30,6 @@ class Node:
                 self.port += 1
 
     def listen(self) -> None:
-        self.flask_app = startup_server(self.host, self.port)
-
         while True:
             data, addr = self.udp_socket.recvfrom(self.buffer_size)
 

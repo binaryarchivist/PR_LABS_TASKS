@@ -1,6 +1,8 @@
 import random
+import threading
 
 from Node import Node
+from server.main import startup_server
 
 
 class Cluster:
@@ -35,14 +37,23 @@ class Cluster:
             print("Election failed, starting a new election.")
             self.run_election()
 
-    def start_heartbeat(self):
-        pass
+    def bootstrap_nodes(self):
+        def start_node(node):
+            node.flask_app = startup_server(node.host, node.port)
+
+        threads = []
+        for node in self.nodes:
+            thread = threading.Thread(target=start_node, args=(node,))
+            threads.append(thread)
+            thread.start()
+
+        for thread in threads:
+            thread.join()
 
     def broadcast_leader_info(self) -> None:
         for node in self.nodes:
             if node == self.leader_node:
                 continue
-            print('node.port: ', node.port)
             self.leader_node.send_message(node.host, node.port, {
                 'type': 'leader_credentials',
                 'leader_host': self.leader_node.host,

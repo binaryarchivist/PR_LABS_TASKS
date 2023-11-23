@@ -18,7 +18,8 @@ def main() -> None:
 
     cluster: Cluster = Cluster(nodes)
     cluster.run_election()
-    cluster.start_heartbeat()
+    cluster_thread = threading.Thread(target=cluster.bootstrap_nodes)
+    cluster_thread.start()
 
     gateway = Gateway(cluster.nodes, cluster.leader_node)
     gateway_thread = threading.Thread(target=gateway.run)

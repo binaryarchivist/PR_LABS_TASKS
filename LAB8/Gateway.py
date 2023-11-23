@@ -11,7 +11,6 @@ class Gateway:
         self.app = Flask(__name__)
         self.cluster_nodes = cluster_nodes
         self.leader_node = leader_node
-        self.setup_routes()
 
     def handle_read(self, path):
         def decorator(f):
@@ -95,4 +94,5 @@ class Gateway:
             pass
 
     def run(self, host='127.0.0.1', port=9999):
+        self.setup_routes()
         self.app.run(host=host, port=port)
