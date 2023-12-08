@@ -49,7 +49,14 @@ export async function POST({request}: APIContext) {
             from: 'cocostarcandrei84@gmail.com',
             to: destinationEmail,
             subject,
-            html: `<a href="${downloadLink}" download="${file.name}">Download ${file.name}</a>`
+            html: `<a href="${downloadLink}" download="${file.name}">Download ${file.name}</a>`,
+            attachments: [
+                {
+                    filename: file.name,
+                    content: buffer
+                }
+
+            ]
         }
 
         transporter.sendMail(mailOptions, (error, info) => {
